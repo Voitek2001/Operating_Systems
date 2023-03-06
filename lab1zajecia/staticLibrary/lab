@@ -1,0 +1,3 @@
+gcc -c staticlib.c
+ar cr libstatic.a staticlib.o
+gcc -o main main.c -L. -lstatic
