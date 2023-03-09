@@ -1,0 +1,167 @@
+Wyniki dla biblioteki statycznej okazały się najszybsze, natomiast dla dwóch pozostałych są porównywalne
+Z zestawu zostały zrealizowane:
+Zadanie1, Zadanie2, Zadanie3a i w częsci Zadanie3b
+Przy zadaniu3b przy większej optymalizacji program się kompiluje
+jednak w podczas wczytywania danych z pliku wyrzuca segmentation fault.
+Poniżej zostały przedstawione czasy z wywołania bez optymalizacji
+i wywołania z flagą -O0.
+
+##### static
+
+Init
+Real Time: 0.000001737 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001653008 ns, User Time 0, System Time 0
+Real Time: 0.001608894 ns, User Time 0, System Time 0
+Real Time: 0.001612675 ns, User Time 0, System Time 0
+Real Time: 0.001576650 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000000793 ns, User Time 0, System Time 0
+Real Time: 0.000000459 ns, User Time 0, System Time 0
+Real Time: 0.000000477 ns, User Time 0, System Time 0
+Real Time: 0.000000450 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000000583 ns, User Time 0, System Time 0
+Real Time: 0.000000399 ns, User Time 0, System Time 0
+Real Time: 0.000000390 ns, User Time 0, System Time 0
+Real Time: 0.000000377 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000000540 ns, User Time 0, System Time 0
+
+#####shared
+
+Init
+Real Time: 0.000003614 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001663657 ns, User Time 0, System Time 0
+Real Time: 0.001721204 ns, User Time 0, System Time 0
+Real Time: 0.001808003 ns, User Time 0, System Time 0
+Real Time: 0.001565633 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000000664 ns, User Time 0, System Time 0
+Real Time: 0.000000446 ns, User Time 0, System Time 0
+Real Time: 0.000000482 ns, User Time 0, System Time 0
+Real Time: 0.000000440 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000002205 ns, User Time 0, System Time 0
+Real Time: 0.000000397 ns, User Time 0, System Time 0
+Real Time: 0.000000455 ns, User Time 0, System Time 0
+Real Time: 0.000000406 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000001119 ns, User Time 0, System Time 0
+
+##### dynamic
+
+Init
+Real Time: 0.000001875 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001649687 ns, User Time 0, System Time 0
+Real Time: 0.001501319 ns, User Time 0, System Time 0
+Real Time: 0.001715046 ns, User Time 0, System Time 0
+Real Time: 0.001586745 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000000652 ns, User Time 0, System Time 0
+Real Time: 0.000000433 ns, User Time 0, System Time 0
+Real Time: 0.000000483 ns, User Time 0, System Time 0
+Real Time: 0.000000429 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000001944 ns, User Time 0, System Time 0
+Real Time: 0.000000400 ns, User Time 0, System Time 0
+Real Time: 0.000000452 ns, User Time 0, System Time 0
+Real Time: 0.000000376 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000000824 ns, User Time 0, System Time 0
+
+
+
+Optymalizacja -O0
+# static
+
+Init
+Real Time: 0.000003949 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001673432 ns, User Time 0, System Time 0
+Real Time: 0.001556769 ns, User Time 0, System Time 0
+Real Time: 0.001693876 ns, User Time 0, System Time 0
+Real Time: 0.001680110 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000001695 ns, User Time 0, System Time 0
+Real Time: 0.000000962 ns, User Time 0, System Time 0
+Real Time: 0.000000867 ns, User Time 0, System Time 0
+Real Time: 0.000000819 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000001137 ns, User Time 0, System Time 0
+Real Time: 0.000000920 ns, User Time 0, System Time 0
+Real Time: 0.000000610 ns, User Time 0, System Time 0
+Real Time: 0.000000536 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000000640 ns, User Time 0, System Time 0
+
+#shared
+
+Init
+Real Time: 0.000002526 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001777140 ns, User Time 0, System Time 0
+Real Time: 0.001643070 ns, User Time 0, System Time 0
+Real Time: 0.001533191 ns, User Time 0, System Time 0
+Real Time: 0.001688463 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000000653 ns, User Time 0, System Time 0
+Real Time: 0.000000503 ns, User Time 0, System Time 0
+Real Time: 0.000000424 ns, User Time 0, System Time 0
+Real Time: 0.000000412 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000001681 ns, User Time 0, System Time 0
+Real Time: 0.000000464 ns, User Time 0, System Time 0
+Real Time: 0.000000406 ns, User Time 0, System Time 0
+Real Time: 0.000000392 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000000836 ns, User Time 0, System Time 0
+
+#dynamic
+
+Init
+Real Time: 0.000001870 ns, User Time 0, System Time 0
+
+Count
+Real Time: 0.001564085 ns, User Time 0, System Time 0
+Real Time: 0.001577038 ns, User Time 0, System Time 0
+Real Time: 0.001517304 ns, User Time 0, System Time 0
+Real Time: 0.001789694 ns, User Time 0, System Time 0
+
+Show
+Real Time: 0.000001133 ns, User Time 0, System Time 0
+Real Time: 0.000000578 ns, User Time 0, System Time 0
+Real Time: 0.000000454 ns, User Time 0, System Time 0
+Real Time: 0.000000551 ns, User Time 0, System Time 0
+
+Delete
+Real Time: 0.000003674 ns, User Time 0, System Time 0
+Real Time: 0.000000401 ns, User Time 0, System Time 0
+Real Time: 0.000000392 ns, User Time 0, System Time 0
+Real Time: 0.000000475 ns, User Time 0, System Time 0
+
+Destroy
+Real Time: 0.000001002 ns, User Time 0, System Time 0
+
