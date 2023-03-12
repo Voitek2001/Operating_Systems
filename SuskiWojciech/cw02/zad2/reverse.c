@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 int find_size(FILE* file) {
@@ -15,7 +17,7 @@ int find_size(FILE* file) {
 	}
 	if (fseek(file, 0, SEEK_CUR) != 0) {
 		fprintf(stderr, "Error(fseek)");
-		exit(1)
+		exit(1);
 	}
 	return size;
 
@@ -28,6 +30,7 @@ FILE* open_file_to_read(const char*filename) {
 		fprintf(stderr, "Error(fopen)");
 		exit(1);
 	}
+	return file;
 }
 
 void close_file(FILE* file) {
@@ -57,19 +60,38 @@ char* get_output(const char* filename) {
 } 
 
 void write_to_file(const char* filename, char* buffer) {
-	FILE* file = fopen(filename, "r");
+	
+	FILE* file = open_file_to_read(filename);
 	if (file == NULL) {
 		fprintf(stderr, "Error(fopen)");
 		exit(1);
 	}
-	if (fwrite() ) {
+	if (fwrite(buffer, sizeof(char), strlen(buffer), file) ) {
 		fprintf(stderr, "Error(fwrite)");
 		exit(1);
 	}
-	if (fclose(file) != 0) {
-		fprintf(stderr, "Error (fclose)");
-		exit(1);
-	}
+
+	close_file(file);
 
 }
 
+
+void reverse_buffer(char* buffer) {
+	
+	int n = strlen(buffer);
+	printf("%c", buffer[n-1]);
+	for (int i = 0; i < n / 2; i++) {
+		char* tmp = buffer;
+		//printf("%c", *tmp);
+		printf("%c %c", buffer[i], buffer[n-1-i]);
+		buffer = &buffer[n - 1 - i];
+		//
+		//buffer[n - 1 - i] = &tmp;
+	}
+}
+
+int main() {
+
+	reverse_buffer("31");
+	return 0;
+}
