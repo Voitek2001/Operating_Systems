@@ -28,7 +28,7 @@ FILE* open_file_to_read(const char*filename) {
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
 		fprintf(stderr, "Error(fopen)");
-		exit(1);
+		exit(13);
 	}
 	return file;
 }
@@ -41,19 +41,50 @@ void close_file(FILE* file) {
 	}
 }
 
-char* get_output(const char* filename) {
+
+
+void write_rev(FILE* file, char* buffer) {
+
+	printf("\n%s\n", buffer);
+	if (fwrite(buffer, sizeof(char), strlen(buffer), file) ) {
+		fprintf(stderr, "Error(fwrite)");
+		exit(1);
+	}
+	printf("jd");
+
+}
+
+
+char* get_output(const char* filename, const char* out_filename ,int number_of_chars) {
 	
 	FILE* file = open_file_to_read(filename);
 	long size = find_size(file);
-	char* buffer = calloc(size, sizeof(char));
+	char* buffer = calloc(number_of_chars + 1, sizeof(char));
 	if (buffer == NULL) {
 		fprintf(stderr, "Error(calloc)");	
 		exit(1);
 	}
-	if(fread(buffer, sizeof(char), size, file) != size) {
+	
+	int number_of_read = size / number_of_chars;
+	int rest = size % number_of_chars;
+	printf("%d, size, %d, rest, ", number_of_read, rest);
+	FILE* out_file = fopen(out_filename, "w");
+	for (int i = 0; i < number_of_read; i++) {
+		if(fread(buffer, sizeof(char), number_of_chars, file) == -1) {
+			fprintf(stderr, "Error(fread)");
+			exit(1);
+		}
+		printf("inside loop %s", buffer);
+		write_rev(out_file, buffer);
+	}
+	if(fread(buffer, sizeof(char), rest, file) == -1) {
 		fprintf(stderr, "Error(fread)");
 		exit(1);
 	}
+	//printf("buf %s", buffer);
+	write_rev(out_file, buffer);
+
+	close_file(out_file);
 	close_file(file);
 	return buffer;
 
@@ -64,7 +95,7 @@ void write_to_file(const char* filename, char* buffer) {
 	FILE* file = open_file_to_read(filename);
 	if (file == NULL) {
 		fprintf(stderr, "Error(fopen)");
-		exit(1);
+		exit(10);
 	}
 	if (fwrite(buffer, sizeof(char), strlen(buffer), file) ) {
 		fprintf(stderr, "Error(fwrite)");
@@ -76,22 +107,31 @@ void write_to_file(const char* filename, char* buffer) {
 }
 
 
-void reverse_buffer(char* buffer) {
+char* reverse_buffer(char *buffer) {
 	
 	int n = strlen(buffer);
-	printf("%c", buffer[n-1]);
 	for (int i = 0; i < n / 2; i++) {
-		char* tmp = buffer;
-		//printf("%c", *tmp);
-		printf("%c %c", buffer[i], buffer[n-1-i]);
-		buffer = &buffer[n - 1 - i];
-		//
-		//buffer[n - 1 - i] = &tmp;
+		char tmp = buffer[i];
+		buffer[i] = buffer[n-1-i];
+		buffer[n-1-i] = tmp;
+
 	}
+	return buffer;
 }
 
-int main() {
+int main(int argc, char** argv) {
 
-	reverse_buffer("31");
+	const char *in_file = argv[1];
+	const char *out_file = argv[2];
+	
+	//read content from file
+	char* buffer = get_output(in_file, out_file,1024);
+	
+	//reverse buffer
+	//char* rev_st = reverse_buffer(buffer);
+	
+	//write to file
+	//write_to_file(out_file, rev_st);
+	
 	return 0;
 }
