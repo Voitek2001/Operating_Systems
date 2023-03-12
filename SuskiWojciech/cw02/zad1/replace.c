@@ -100,7 +100,7 @@ void write_to_file_lib(char* buffer, const char* filename) {
 		exit(1);
 	}	
 
-	if (fclose(file) == -1) {
+	if (fclose(file) != 0) {
 		fprintf(stderr, "Error while closing the file\n");
 		exit(1);
 	}
