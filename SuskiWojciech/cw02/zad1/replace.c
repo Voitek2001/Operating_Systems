@@ -7,6 +7,10 @@
 #include <unistd.h>
 #include <string.h>
 #include "replace.h"
+#include <sys/times.h>
+#include <time.h>
+#include <inttypes.h>
+
 
 
 #define find_size(file) _Generic(file, FILE*: find_size_lib, int: find_size_sys)(file)
@@ -119,6 +123,27 @@ void replace_char(char* read_file_buffer, const char to_replace, const char new_
 }
 
 
+
+enum { NS_PER_SECOND = 1000000000 };
+
+void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
+{
+    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
+    td->tv_sec  = t2.tv_sec - t1.tv_sec;
+    if (td->tv_sec > 0 && td->tv_nsec < 0)
+    {
+        td->tv_nsec += NS_PER_SECOND;
+        td->tv_sec--;
+    }
+    else if (td->tv_sec < 0 && td->tv_nsec > 0)
+    {
+        td->tv_nsec -= NS_PER_SECOND;
+        td->tv_sec++;
+    }
+}
+
+
+
 int main(int argc, char** argv) {
 	
 	
@@ -135,10 +160,27 @@ int main(int argc, char** argv) {
 
 	
 	char* file_content = get_output(path);
-	replace_char(file_content, char_to_replace, new_char);
-		
+
+
+	struct timespec time_buff_start, time_buff_end, delta;
+        struct tms st_cpu;
+        struct tms en_cpu;
+
+
+        clock_gettime(CLOCK_REALTIME, &time_buff_start);
+        times(&st_cpu);
+
+	replace_char(file_content, char_to_replace, new_char);	
 	write_to_file(file_content, new_path);
 	
+        times(&en_cpu);
+        clock_gettime(CLOCK_REALTIME, &time_buff_end);
+
+        sub_timespec(time_buff_start, time_buff_end, &delta);
+        printf("Real Time: %d.%.9ld ns, User Time %jd, System Time %jd\n",
+                        (int)(delta.tv_sec), delta.tv_nsec,
+                        (intmax_t)(en_cpu.tms_utime - st_cpu.tms_utime),
+                        (intmax_t)(en_cpu.tms_stime - st_cpu.tms_stime));
 	return 0;
 
 }

@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "reverse.h"
+#include <time.h>
+#include <sys/times.h>
+#include <inttypes.h>
 
 
-int find_size(FILE* file) {
+long find_size(FILE* file) {
 
 	if (fseek(file, 0, SEEK_END) != 0) {
 		fprintf(stderr, "Error(fseek)");
@@ -15,7 +19,7 @@ int find_size(FILE* file) {
 		fprintf(stderr, "Error(ftell)");
 		exit(1);
 	}
-	if (fseek(file, 0, SEEK_CUR) != 0) {
+	if (fseek(file, 0, SEEK_SET) != 0) {
 		fprintf(stderr, "Error(fseek)");
 		exit(1);
 	}
@@ -45,50 +49,89 @@ void close_file(FILE* file) {
 
 void write_rev(FILE* file, char* buffer) {
 
-	printf("\n%s\n", buffer);
-	if (fwrite(buffer, sizeof(char), strlen(buffer), file) ) {
+	if (fwrite(buffer, sizeof(char), strlen(buffer), file) == -1) {
 		fprintf(stderr, "Error(fwrite)");
 		exit(1);
 	}
-	printf("jd");
 
 }
 
 
-char* get_output(const char* filename, const char* out_filename ,int number_of_chars) {
+char* reverse_file(const char* filename, const char* out_filename ,int number_of_chars) {
 	
+	// open file in read mode
 	FILE* file = open_file_to_read(filename);
+	
+	// open file to write
+	FILE* out_file = fopen(out_filename, "w");	
+	
+	// get size of file
 	long size = find_size(file);
-	char* buffer = calloc(number_of_chars + 1, sizeof(char));
+
+	// allocate a memory for our input	
+	char* buffer = calloc(number_of_chars + 2, sizeof(char));
 	if (buffer == NULL) {
 		fprintf(stderr, "Error(calloc)");	
 		exit(1);
 	}
 	
+	// calculate how many times we have to read from file depends on how many chars we want to read from file
 	int number_of_read = size / number_of_chars;
 	int rest = size % number_of_chars;
-	printf("%d, size, %d, rest, ", number_of_read, rest);
-	FILE* out_file = fopen(out_filename, "w");
-	for (int i = 0; i < number_of_read; i++) {
+
+
+	for (int i = 1; i <= number_of_read; i++) {
+	
+		fseek(file, -i*number_of_chars, SEEK_END);
+		
 		if(fread(buffer, sizeof(char), number_of_chars, file) == -1) {
 			fprintf(stderr, "Error(fread)");
 			exit(1);
 		}
-		printf("inside loop %s", buffer);
+		buffer[number_of_chars] = 0;
+
+		// reverse read data
+		buffer = reverse_buffer(buffer);
+		if (buffer[0] == '\n') {
+			buffer++;
+		}
+		// write them to out_file
 		write_rev(out_file, buffer);
 	}
-	if(fread(buffer, sizeof(char), rest, file) == -1) {
-		fprintf(stderr, "Error(fread)");
-		exit(1);
-	}
-	//printf("buf %s", buffer);
-	write_rev(out_file, buffer);
 
+    	fseek(file, 0, SEEK_SET);
+	if (rest != 0) {
+		// if there are more characters write them and reverse as well
+		if(fread(buffer, sizeof(char), rest, file) != rest) {
+			fprintf(stderr, "Error(fread)");
+			exit(1);
+		}
+	
+	
+		buffer[rest] = 0;
+		buffer = reverse_buffer(buffer);
+	
+		buffer[rest] = '\n';
+		buffer[rest+1] = 0;
+	
+	
+		if (*buffer == '\n') {
+			buffer++;
+		}	
+	} else {
+		buffer[0] ='\n';
+		buffer[1] = 0;
+	}
+	
+	write_rev(out_file, buffer);
+	// close both file
 	close_file(out_file);
 	close_file(file);
+
 	return buffer;
 
 } 
+
 
 void write_to_file(const char* filename, char* buffer) {
 	
@@ -119,19 +162,56 @@ char* reverse_buffer(char *buffer) {
 	return buffer;
 }
 
+enum { NS_PER_SECOND = 1000000000 };
+
+void sub_timespec(struct timespec t1, struct timespec t2, struct timespec *td)
+{
+    td->tv_nsec = t2.tv_nsec - t1.tv_nsec;
+    td->tv_sec  = t2.tv_sec - t1.tv_sec;
+    if (td->tv_sec > 0 && td->tv_nsec < 0)
+    {
+        td->tv_nsec += NS_PER_SECOND;
+        td->tv_sec--;
+    }
+    else if (td->tv_sec < 0 && td->tv_nsec > 0)
+    {
+        td->tv_nsec -= NS_PER_SECOND;
+        td->tv_sec++;
+    }
+}
+
+
+
 int main(int argc, char** argv) {
+	
+	if (argc != 4) {
+		fprintf(stderr, "Wrong number of arguments");
+		return 1;
+	}
+
+	struct timespec time_buff_start, time_buff_end, delta;
+        struct tms st_cpu;
+        struct tms en_cpu;
+
+	
 
 	const char *in_file = argv[1];
 	const char *out_file = argv[2];
+	int number_of_chars = atoi(argv[3]);
 	
-	//read content from file
-	char* buffer = get_output(in_file, out_file,1024);
-	
-	//reverse buffer
-	//char* rev_st = reverse_buffer(buffer);
-	
-	//write to file
-	//write_to_file(out_file, rev_st);
+	clock_gettime(CLOCK_REALTIME, &time_buff_start);	
+	times(&st_cpu);
+	reverse_file(in_file, out_file, number_of_chars);
+	times(&en_cpu);
+	clock_gettime(CLOCK_REALTIME, &time_buff_end);
+
+	sub_timespec(time_buff_start, time_buff_end, &delta);
+	printf("Real Time: %d.%.9ld ns, User Time %jd, System Time %jd\n",
+                        (int)(delta.tv_sec), delta.tv_nsec,
+                        (intmax_t)(en_cpu.tms_utime - st_cpu.tms_utime),
+                        (intmax_t)(en_cpu.tms_stime - st_cpu.tms_stime));
+
+
 	
 	return 0;
 }
