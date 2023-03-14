@@ -152,24 +152,22 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-
+	//read input variables
 	int char_to_replace = argv[1][0];
 	int new_char = argv[2][0];	
 	const char *path = argv[3];
 	const char *new_path = argv[4];
 
-	
-	char* file_content = get_output(path);
-
-
+	//declarete time variables
 	struct timespec time_buff_start, time_buff_end, delta;
         struct tms st_cpu;
         struct tms en_cpu;
 
-
+	// run function and measure time of execution
         clock_gettime(CLOCK_REALTIME, &time_buff_start);
         times(&st_cpu);
 
+	char* file_content = get_output(path);
 	replace_char(file_content, char_to_replace, new_char);	
 	write_to_file(file_content, new_path);
 	
