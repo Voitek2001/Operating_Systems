@@ -12,25 +12,34 @@
 void browse_catalog(char* path) {
 	
 	DIR *pDir = opendir(path);
+	if (pDir == NULL) {
+		fprintf(stderr, "Cannot open directory %s", path);
+		return;
+	}
 	struct dirent *pDirent;
 	struct stat statbuf;
 	int status;
 	char new_path[PATH_MAX];
+	char curr_file[PATH_MAX];
 	printf("path inf: %s\n", path);
 
+	pid_t pID = fork();
+	if (pID == 0) { 
 	while ((pDirent = readdir(pDir)) != NULL) {
-		status = stat(pDirent->d_name, &statbuf);
+		
+		sprintf(curr_file, "%s/%s", path, pDirent->d_name);
+		status = stat(curr_file, &statbuf);
 		if (status == -1) {
 			fprintf(stderr, "Failed getting info about file [%s]", pDirent->d_name);
 			return ;
 		}
-		if (S_ISDIR(statbuf.st_mode) && fork() == getpid()) {
+		if (S_ISDIR(statbuf.st_mode)) {
 			if (strncmp(pDirent->d_name, ".", 1) == 0) {
 				continue;
 			} 
 			
 			//fork();
-			sprintf(new_path, "%s/%s\n", path, pDirent->d_name);
+			sprintf(new_path, "%s/%s", path, pDirent->d_name);
 			printf("tu %s\n", new_path);
 			browse_catalog(new_path);
 		}
@@ -39,6 +48,7 @@ void browse_catalog(char* path) {
 			printf("regular file: %s\n", pDirent->d_name);
 		}
 
+	}
 	}
 
 }
