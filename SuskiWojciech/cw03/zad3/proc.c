@@ -8,8 +8,28 @@
 #include <dirent.h>
 #include <string.h>
 
+char* get_file_start(char const* filename, int nmb_char) {
+	
+	FILE* file = fopen(filename, "r");
+	if (file == NULL) {
+		exit(1);
+	}
+	fseek(file, 0, SEEK_END);
+	int size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	
+	if (size < nmb_char) {
+		return NULL;
+	}
+	char* buffer = calloc(sizeof(char), nmb_char + 1);
+	fread(buffer, sizeof(char), nmb_char, file);
+	fclose(file);
 
-void browse_catalog(char* path) {
+	return buffer;
+}
+
+
+void browse_catalog(char* path, char* start_str) {
 	
 	DIR *pDir = opendir(path);
 	if (pDir == NULL) {
@@ -19,13 +39,12 @@ void browse_catalog(char* path) {
 	struct dirent *pDirent;
 	struct stat statbuf;
 	int status;
-	char new_path[PATH_MAX];
 	char curr_file[PATH_MAX];
-	printf("path inf: %s\n", path);
 
 	pid_t pID = fork();
-	if (pID == 0) { 
+	if (pID == 0) {
 	while ((pDirent = readdir(pDir)) != NULL) {
+		
 		
 		sprintf(curr_file, "%s/%s", path, pDirent->d_name);
 		status = stat(curr_file, &statbuf);
@@ -33,24 +52,28 @@ void browse_catalog(char* path) {
 			fprintf(stderr, "Failed getting info about file [%s]", pDirent->d_name);
 			return ;
 		}
+		sprintf(curr_file, "%s/%s", path, pDirent->d_name);
 		if (S_ISDIR(statbuf.st_mode)) {
-			if (strncmp(pDirent->d_name, ".", 1) == 0) {
-				continue;
-			} 
+			if (strcmp(pDirent->d_name, ".") != 0 && strcmp(pDirent->d_name, "..") != 0) {
 			
-			//fork();
-			sprintf(new_path, "%s/%s", path, pDirent->d_name);
-			printf("tu %s\n", new_path);
-			browse_catalog(new_path);
+				browse_catalog(curr_file, start_str);
+			}
 		}
-		if(S_ISREG(statbuf.st_mode)) {
-		
-			printf("regular file: %s\n", pDirent->d_name);
+		else if(S_ISREG(statbuf.st_mode)) {
+	
+			char* buffer = get_file_start(curr_file, strlen(start_str));
+			if (strcmp(buffer, start_str) == 0) {
+			
+				printf("regular file:%s , pid:%d\n", curr_file, getpid());
+			}
 		}
 
 	}
+	
+	exit(0);
 	}
 
+	wait(NULL);
 }
 
 int main(int argc, char** argv) {
@@ -60,40 +83,16 @@ int main(int argc, char** argv) {
 	}
 	const char* dir_path = argv[1];
 	char* start_str = argv[2];
-
+	/*
+	if (strncmp(dir_path, "..", 2) == 0) {
+		fprintf(stderr, "invalid directory name");
+		return 2;
+	} 
+	*/
 	char path[PATH_MAX];
 	sprintf(path, "%s", dir_path);
 	printf("input path: %s\n", path);
-	browse_catalog(path);
-	/*
-	struct dirent *pDirent;
-	DIR *pDir = opendir(dir_path);
-	
-	struct stat statbuf;
-	int status;
-	while ((pDirent = readdir(pDir)) != NULL) {
-		status = stat(pDirent->d_name, &statbuf);
-		if (status == -1) {
-			fprintf(stderr, "Failed getting info about file [%s]", pDirent->d_name);
-			return 1;
-		}
-		if (S_ISDIR(statbuf.st_mode)) {
-			if (strncmp(pDirent->d_name, ".", 1) == 0) {
-				continue;
-			} 
-			//fork()	
-			
-			printf("%s\n", pDirent->d_name);
-			
-		}
+	browse_catalog(path, start_str);
 
-
-	}
-
-	if (fork() == 0) {
-		
-	}
-
-*/
 	return 0;
 }

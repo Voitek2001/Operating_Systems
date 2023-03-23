@@ -1,11 +1,7 @@
 
 
-
 all:
 	gcc -Wall -o proc proc.c
 
-test:
-	./proc . jacek
-
 clean:
-	rm proc
+	rm proc 
