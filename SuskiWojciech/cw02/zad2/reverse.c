@@ -69,7 +69,7 @@ char* reverse_file(const char* filename, const char* out_filename ,int number_of
 	long size = find_size(file);
 
 	// allocate a memory for our input	
-	char* buffer = calloc(number_of_chars + 2, sizeof(char));
+	char* buffer = calloc(number_of_chars + 1, sizeof(char));
 	if (buffer == NULL) {
 		fprintf(stderr, "Error(calloc)");	
 		exit(1);
@@ -92,9 +92,6 @@ char* reverse_file(const char* filename, const char* out_filename ,int number_of
 
 		// reverse read data
 		buffer = reverse_buffer(buffer);
-		if (buffer[0] == '\n') {
-			buffer++;
-		}
 		// write them to out_file
 		write_rev(out_file, buffer);
 	}
@@ -111,17 +108,8 @@ char* reverse_file(const char* filename, const char* out_filename ,int number_of
 		buffer[rest] = 0;
 		buffer = reverse_buffer(buffer);
 	
-		buffer[rest] = '\n';
-		buffer[rest+1] = 0;
+	}	
 	
-	
-		if (*buffer == '\n') {
-			buffer++;
-		}	
-	} else {
-		buffer[0] ='\n';
-		buffer[1] = 0;
-	}
 	
 	write_rev(out_file, buffer);
 	// close both file
@@ -206,12 +194,15 @@ int main(int argc, char** argv) {
 	clock_gettime(CLOCK_REALTIME, &time_buff_end);
 
 	sub_timespec(time_buff_start, time_buff_end, &delta);
+	double accum = (double)(time_buff_end.tv_sec - time_buff_start.tv_sec)+((double)(time_buff_end.tv_nsec-time_buff_start.tv_nsec))/NS_PER_SECOND;
+	
+        printf("\nReal time needed: %lf",accum);
 	printf("Real Time: %d.%.9ld ns, User Time %jd, System Time %jd\n",
                         (int)(delta.tv_sec), delta.tv_nsec,
                         (intmax_t)(en_cpu.tms_utime - st_cpu.tms_utime),
                         (intmax_t)(en_cpu.tms_stime - st_cpu.tms_stime));
 
-
+	
 	
 	return 0;
 }

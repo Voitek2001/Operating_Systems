@@ -1,2 +1,4 @@
-Real Time: 0.000353084 ns, User Time 0, System Time 0
-Real Time: 0.000586069 ns, User Time 0, System Time 0
+
+Real time needed: 0.000372Real Time: 0.000371733 ns, User Time 0, System Time 0
+
+Real time needed: 0.003757Real Time: 0.003756681 ns, User Time 0, System Time 0
