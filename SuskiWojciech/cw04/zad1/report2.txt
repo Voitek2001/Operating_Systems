@@ -1,0 +1,11 @@
+Ignorowane sygnały nie sa dodawane do listy oczekujacych sygnalow
+Ignorowane sygnaly dalej sa ignorowane po wywołaniu exec
+Sygnal zablokowany jest widoczny jako oczekujacy po wywolaniu exec
+Sygnal zablokowany w procesie parent nie jest widoczny jako oczekujacy w procesie child
+Sygnal obslugiwany zaczyna byc ignorowany po wywolaniu exec
+
+-Po wykonaniu funkcji fork proces potomny dziedziczy po swoim przodku wartości maski sygnałów i
+ustalenia dotyczące obsługi sygnałów.
+-Nieobsłużone sygnały procesu macierzystego są czyszczone.
+-Po wykonaniu funkcji exec maska obsługi sygnałów i nieobsłużone sygnały są takie same jak w procesie,
+w którym wywołano funkcję exec.
